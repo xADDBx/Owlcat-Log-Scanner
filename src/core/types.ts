@@ -2,6 +2,8 @@ export interface LogLine {
   number: number;
   text: string;
   truncated: boolean;
+  // Optional bounded context preceding the matching line.
+  context?: string;
 }
 
 export interface LogType {

@@ -83,6 +83,7 @@ export async function scanLog(
         number: line.number,
         text: line.text.slice(0, MAX_EVIDENCE_LENGTH),
         truncated: line.truncated || line.text.length > MAX_EVIDENCE_LENGTH,
+        ...(line.context !== undefined ? { context: line.context } : {}),
       });
     }
   }

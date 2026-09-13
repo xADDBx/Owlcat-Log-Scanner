@@ -169,6 +169,10 @@ test('Blueprint-init fallback is suppressed per exception, in either log format'
   }
   const unknown = await stack('Player(5)(1).log', 'ArgumentException:');
   const known = await stack('Player(206).log', 'FormatException:');
+  const patch = expectedEvidence['WotR/Player(5)(1).log']![0]![1];
+  const patchIndex = unknown.split('\n').indexOf(patch);
+  assert.ok(patchIndex > 0);
+  const fullTrace = unknown.split('\n').slice(0, patchIndex + 1).join('\n');
   const lateMatch = unknown.replace('ArgumentException:', 'NullReferenceException:') + '\n  at Native.Call () <0x123456 + 0x00000>';
   const playerHeader = fixtures.find(file => file.path === 'WotR/Player(5)(1).log')!.firstLine;
   for (const header of [playerHeader, '[0 - Resources]: Requested: dungeons_areshkagal_prologue.worldtex, loading']) {
@@ -193,6 +197,10 @@ test('Blueprint-init fallback is suppressed per exception, in either log format'
       if (fallback) {
         assert.equal(typeof rule.name, 'function');
         assert.equal(typeof rule.name === 'function' && rule.name(fallback), 'ExpandedContent: error during blueprint initialization');
+        const evidence = fallback.evidence[0]!;
+        const expectedTrace = header === playerHeader ? fullTrace : fullTrace.replace(/^[ \t]*at /gm, '');
+        assert.equal([evidence.context, evidence.text].join('\n'), expectedTrace);
+        assert.equal(evidence.truncated, false);
       }
     }
     // A future rule appended after the fallback must still take precedence.
@@ -201,5 +209,15 @@ test('Blueprint-init fallback is suppressed per exception, in either log format'
     const text = header === playerHeader ? body : body.replace(/^[ \t]*at /gm, '');
     const report = await scanLog(new Blob([`${header}\n${text}`]), 'sample.log', { ...game, detections: [rule, futureRule] });
     assert.deepEqual(report.findings.map(finding => [finding.detectionCode, finding.occurrences]), [['WOTR-E999', 1], ['WOTR-E008', 1]]);
+    // Deep traces remain bounded without losing the exception or matching patch frame.
+    const deep = unknown.replace(patch, `${'  at UnityEngine.Sprite.Create ()\n'.repeat(3000)}${patch}`);
+    const deepText = header === playerHeader ? deep : deep.replace(/^[ \t]*at /gm, '');
+    const deepReport = await scanLog(new Blob([`${header}\n${deepText}`]), 'sample.log', game);
+    const evidence = deepReport.findings.find(finding => finding.detectionCode === rule.code)!.evidence[0]!;
+    assert.ok(evidence.context!.startsWith('ArgumentException:'));
+    assert.ok(evidence.context!.length <= 64 * 1024);
+    assert.ok(evidence.context!.endsWith('\n…'));
+    assert.equal(evidence.text, header === playerHeader ? patch : patch.replace(/^[ \t]*at /, ''));
+    assert.equal(evidence.truncated, true);
   }
 });
