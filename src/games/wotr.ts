@@ -3,6 +3,7 @@ import { en } from '../locales/en';
 import { relativeJumpOverflow } from './wotr/relative-jump';
 import { oldHarmonyVersion } from './wotr/old-harmony';
 import { saveParsingError } from './wotr/save-parsing';
+import { modConflict, modConflicts } from './wotr/mod-conflicts';
 
 export const detections: readonly Detection[] = [{
   code: 'WOTR-E001',
@@ -37,14 +38,22 @@ export const detections: readonly Detection[] = [{
   kind: 'parser',
   create: () => saveParsingError(/\bJsonSerializationException: Failed to load blueprint by guid [\da-f]{32}\b/i),
 }, {
-  code: 'WOTR-E006',
+  code: 'WOTR-E005',
   aliases: ['CrashToDesktop'],
   ...en.wotr.crashToDesktop,
   severity: 'error',
   solutionCodes: ['WOTR-S008'],
   kind: 'regex',
   pattern: /^=+ OUTPUTTING STACK TRACE =+$/,
-}];
+}, ...modConflicts.map((conflict): Detection => ({
+  code: conflict.code,
+  aliases: ['IncompatibleMods'],
+  ...en.wotr.modConflict,
+  severity: 'error',
+  solutionCodes: [conflict.solutionCode],
+  kind: 'parser',
+  create: () => modConflict(conflict),
+}))];
 
 export const solutions: readonly Solution[] = [
   {
@@ -75,6 +84,10 @@ export const solutions: readonly Solution[] = [
     ...en.wotr.verifyGameFiles,
     url: 'https://help.steampowered.com/en/faqs/view/0C48-FCBD-DA71-93EB',
   },
+  ...modConflicts.map(conflict => ({
+    code: conflict.solutionCode,
+    name: en.wotr.removeConflictingMod(...conflict.mods),
+  })),
 ];
 
 export const wotr: GameDefinition = {

@@ -72,5 +72,10 @@ export const en = {
       name: 'Verify game files in your launcher.',
       urlLabel: 'Steam: verify game files',
     },
+    modConflict: {
+      name: 'Possible mod conflict',
+      description: 'This error can occur when the listed mods are used together.',
+    },
+    removeConflictingMod: (first: string, second: string) => `Disable or remove ${first} or ${second}.`,
   },
 };

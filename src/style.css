@@ -25,7 +25,7 @@ p { margin-bottom: 1rem; }
 .intro { color: var(--muted); font-size: 1.0625rem; }
 .notice { background: var(--accent-surface); border-left: 2px solid var(--accent); padding: .9rem 1.1rem; font-size: .9375rem; }
 .page-heading + .notice { margin: 2rem 0; }
-.workspace { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+.workspace { display: grid; grid-template-columns: 480px minmax(0, 1fr); gap: 1.5rem; align-items: start; }
 .scan-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; }
 .report-panel { min-width: 0; }
 .drop-zone { text-align: center; border: 1px dashed var(--drop-border); border-radius: 5px; padding: 1.25rem .75rem; background: var(--background); transition: border-color .15s, background .15s; }
