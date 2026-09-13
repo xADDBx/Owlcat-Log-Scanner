@@ -58,7 +58,7 @@ export const en = {
     restoreSaveMods: {
       name: 'Make sure all mods used by this save are still installed and enabled.',
       urlLabel: 'Mod blueprint database',
-      description: 'Search all_blueprints.txt for the missing GUID from your log (Ctrl+F); a match may identify the mod.',
+      description: 'Search all_blueprints.txt for the GUID above (Ctrl+F); a match may identify the mod.',
     },
   },
 };

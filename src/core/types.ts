@@ -30,8 +30,8 @@ interface DetectionInfo {
 }
 
 export interface LineParser {
-  // Return true once per occurrence. Keep any cross-line state bounded.
-  onLine(line: LogLine): boolean;
+  // Return true or the relevant earlier line once per occurrence. Keep state bounded.
+  onLine(line: LogLine): boolean | LogLine;
   // Optional end-of-file detection (e.g. a missing expected closing event).
   finish?(): boolean;
 }

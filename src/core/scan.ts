@@ -97,7 +97,8 @@ export async function scanLog(
     for (const runner of runners) {
       if (runner.failed) continue;
       try {
-        if (runner.parser.onLine(line)) record(runner.rule.code, line);
+        const match = runner.parser.onLine(line);
+        if (match) record(runner.rule.code, match === true ? line : match);
       } catch {
         runner.failed = true;
       }

@@ -60,6 +60,8 @@ export function renderReport(
     if (!rule) continue;
     const card = element('article', '', `finding ${rule.severity}`);
     card.append(element('h3', rule.name));
+    const first = finding.evidence[0];
+    if (first) card.append(element('pre', first.text));
     if (rule.solutionCodes.length) card.append(element('p', en.possibleFixes));
     const solutions = element('ul', '', 'solutions');
     for (const code of rule.solutionCodes) {
@@ -84,7 +86,7 @@ export function renderReport(
     if (rule.aliases?.length) details.append(element('p', `Also known as: ${rule.aliases.join(', ')}`, 'muted'));
     for (const evidence of finding.evidence) {
       details.append(element('p', `Line ${evidence.number}${evidence.truncated ? ' · shortened' : ''}`, 'muted'));
-      details.append(element('pre', evidence.text));
+      if (evidence !== first) details.append(element('pre', evidence.text));
     }
     card.append(details);
     findings.append(card);

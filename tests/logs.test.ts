@@ -9,7 +9,7 @@ import { matchesLogType } from '../src/core/identify';
 import { scanLog, validateGame } from '../src/core/scan';
 import { games } from '../src/games';
 import { oldHarmonyVersion } from '../src/games/wotr/old-harmony';
-import { expectedIssues } from './expectations';
+import { expectedEvidence, expectedIssues } from './expectations';
 
 const root = fileURLToPath(new URL('../logs/', import.meta.url));
 const fixtures: { path: string; game: string; type: string; firstLine: string; matches: Set<string> }[] = [];
@@ -130,6 +130,12 @@ describe('Complete scans and issue results', () => {
           Object.fromEntries(report.findings.map(finding => [finding.detectionCode, finding.occurrences])),
           Object.fromEntries(expected),
         );
+        if (expectedEvidence[fixture.path]) {
+          assert.deepEqual(
+            report.findings.flatMap(finding => finding.evidence.map(line => [line.number, line.text])),
+            expectedEvidence[fixture.path],
+          );
+        }
       });
     }
   }

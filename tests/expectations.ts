@@ -1,3 +1,11 @@
+// Exception messages and log line numbers (including standalone CR line endings).
+export const expectedEvidence: Record<string, [number, string][]> = {
+  'WotR/Player-save-malformed.log': [[283, "JsonReaderException: Invalid property identifier character: ,. Path '', line 1, position 1."]],
+  'WotR/GameLogFull-save-malformed.txt': [[1340, "[12.4612 - Unity]: JsonReaderException: Invalid property identifier character: ,. Path '', line 1, position 1."]],
+  'WotR/Player-save-missing-blueprint.log': [[283, 'JsonSerializationException: Failed to load blueprint by guid deadbeefdeadbeefdeadbeefdeadbeef']],
+  'WotR/GameLogFull-save-missing-blueprint.txt': [[1420, '[12.8437 - Unity]: JsonSerializationException: Failed to load blueprint by guid deadbeefdeadbeefdeadbeefdeadbeef']],
+};
+
 // Game/rule code -> log path relative to logs/ -> expected occurrence count (0 means absent).
 // Add explicit counts after reviewing each applicable log.
 export const expectedIssues: Record<string, Record<string, number>> = {
