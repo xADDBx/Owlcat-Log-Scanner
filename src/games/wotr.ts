@@ -4,6 +4,7 @@ import { relativeJumpOverflow } from './wotr/relative-jump';
 import { oldHarmonyVersion } from './wotr/old-harmony';
 import { saveParsingError } from './wotr/save-parsing';
 import { modConflict, modConflicts } from './wotr/mod-conflicts';
+import { makingFriendsGuidError } from './wotr/making-friends';
 
 export const detections: readonly Detection[] = [{
   code: 'WOTR-E001',
@@ -53,7 +54,15 @@ export const detections: readonly Detection[] = [{
   solutionCodes: [conflict.solutionCode],
   kind: 'parser',
   create: () => modConflict(conflict),
-}))];
+})), {
+  code: 'WOTR-E007',
+  aliases: ['WOTR_MAKING_FRIENDS.UnrecognizedGuidFormat'],
+  ...en.wotr.makingFriendsGuidError,
+  severity: 'error',
+  solutionCodes: ['WOTR-S010'],
+  kind: 'parser',
+  create: makingFriendsGuidError,
+}];
 
 export const solutions: readonly Solution[] = [
   {
@@ -88,6 +97,11 @@ export const solutions: readonly Solution[] = [
     code: conflict.solutionCode,
     name: en.wotr.removeConflictingMod(...conflict.mods),
   })),
+  {
+    code: 'WOTR-S010',
+    ...en.wotr.updateMakingFriends,
+    url: 'https://discord.com/channels/645948717400064030/815735034514112512/1521744713776889969',
+  },
 ];
 
 export const wotr: GameDefinition = {

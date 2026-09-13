@@ -77,5 +77,12 @@ export const en = {
       description: 'This error can occur when the listed mods are used together.',
     },
     removeConflictingMod: (first: string, second: string) => `Disable or remove ${first} or ${second}.`,
+    makingFriendsGuidError: {
+      name: 'Unrecognized GUID format in MAKING FRIENDS',
+      description: 'MAKING FRIENDS 0.2.4 and earlier use a GUID file path that breaks on macOS.',
+    },
+    updateMakingFriends: {
+      name: 'Install the MAKING FRIENDS build from Discord',
+    },
   },
 };
