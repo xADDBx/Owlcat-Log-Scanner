@@ -20,9 +20,6 @@ export function validateGame(game: GameDefinition): void {
     if (detection.solutionCodes.some((code) => !game.solutions.some((solution) => solution.code === code))) {
       throw new Error(`Unknown solution referenced by ${detection.code}.`);
     }
-    if (!detection.logTypes.length || detection.logTypes.some((id) => !game.logTypes.some((type) => type.id === id))) {
-      throw new Error(`Unknown log type referenced by ${detection.code}.`);
-    }
   }
 }
 
@@ -50,7 +47,7 @@ export async function scanLog(
   const started = performance.now();
   const fileNameLogType = identifyFileName(fileName, game);
   // A signature may appear at EOF. Run candidate rules from the start so an
-  // earlier issue is not missed; only publish results for the identified type.
+  // earlier issue is not missed; only publish results for a recognized game log.
   const runners = game.detections.map((rule) => {
     let parser: LineParser;
     if (rule.kind === 'parser') {
@@ -137,7 +134,7 @@ export async function scanLog(
   reader.finish();
   const matchedLogTypes = [...matchedTypes];
   const logType = matchedLogTypes.length === 1 ? matchedLogTypes[0]! : null;
-  const applicable = runners.filter(({ rule }) => logType !== null && rule.logTypes.includes(logType));
+  const applicable = logType !== null ? runners : [];
   for (const { rule, parser, failed } of applicable) {
     if (failed) throw new Error(`Check ${rule.code} failed. The scan is incomplete; ask for help on Discord.`);
     try {

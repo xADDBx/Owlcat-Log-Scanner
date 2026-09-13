@@ -1,16 +1,24 @@
 import type { Detection, GameDefinition, Solution } from '../core/types';
 import { en } from '../locales/en';
 import { relativeJumpOverflow } from './wotr/relative-jump';
+import { oldHarmonyVersion } from './wotr/old-harmony';
 
 export const detections: readonly Detection[] = [{
   code: 'WOTR-E001',
   aliases: ['MonoModRelJumpOverflow'],
   ...en.wotr.relativeJumpOverflow,
   severity: 'error',
-  logTypes: ['player', 'game-log-full'],
   solutionCodes: ['WOTR-S001', 'WOTR-S002', 'WOTR-S003'],
   kind: 'parser',
   create: relativeJumpOverflow,
+}, {
+  code: 'WOTR-E002',
+  aliases: ['OldHarmonyVersion'],
+  ...en.wotr.oldHarmony,
+  severity: 'error',
+  solutionCodes: ['WOTR-S004', 'WOTR-S005', 'WOTR-S006'],
+  kind: 'parser',
+  create: oldHarmonyVersion,
 }];
 
 export const solutions: readonly Solution[] = [
@@ -25,6 +33,13 @@ export const solutions: readonly Solution[] = [
     url: 'https://learn.microsoft.com/en-us/defender-endpoint/customize-exploit-protection',
   },
   { code: 'WOTR-S003', ...en.wotr.protonVersion },
+  { code: 'WOTR-S004', ...en.wotr.replaceHarmony },
+  {
+    code: 'WOTR-S005',
+    ...en.wotr.downgradeUmm,
+    url: 'https://www.nexusmods.com/site/mods/21?tab=files',
+  },
+  { code: 'WOTR-S006', ...en.wotr.doorstop },
 ];
 
 export const wotr: GameDefinition = {

@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { matchesLogType } from '../src/core/identify';
 import { scanLog, validateGame } from '../src/core/scan';
 import { games } from '../src/games';
+import { oldHarmonyVersion } from '../src/games/wotr/old-harmony';
 import { expectedIssues } from './expectations';
 
 const root = fileURLToPath(new URL('../logs/', import.meta.url));
@@ -83,22 +84,19 @@ describe('Issue expectations', () => {
         const fixture = fixtures.find(file => file.path === path);
         assert.ok(fixture, `Unknown fixture: ${path}`);
         assert.equal(fixture.game, entry.game.id, `${key}: wrong-game expectation for ${path}`);
-        assert.ok(entry.rule.logTypes.includes(fixture.type), `${key}: wrong-log-type expectation for ${path}`);
-        assert.equal(typeof expected, 'boolean', `${key}/${path}: review and label true or false`);
+        assert.ok(Number.isInteger(expected) && expected >= 0, `${key}/${path}: review and set the occurrence count`);
       }
     }
   });
   if (!rules.length) test('Issue accuracy is untested: no diagnostic rules are implemented', { skip: true }, () => {});
-  for (const { game, rule, key } of rules) {
-    test(`${key}: every applicable log is reviewed, with positives and negatives per log type`, () => {
+  for (const { game, key } of rules) {
+    test(`${key}: every game log is reviewed, with positive and negative examples`, () => {
       const labels = expectedIssues[key];
       assert.ok(labels, `Missing expectations for ${key}`);
-      for (const type of rule.logTypes) {
-        const applicable = fixtures.filter(file => file.game === game.id && file.type === type);
-        for (const file of applicable) assert.equal(typeof labels[file.path], 'boolean', `Review ${key} in ${file.path}`);
-        assert.ok(applicable.some(file => labels[file.path] === true), `${key}/${type}: no positive example`);
-        assert.ok(applicable.some(file => labels[file.path] === false), `${key}/${type}: no negative example`);
-      }
+      const applicable = fixtures.filter(file => file.game === game.id);
+      for (const file of applicable) assert.ok(Object.hasOwn(labels, file.path), `Review ${key} in ${file.path}`);
+      assert.ok(applicable.some(file => labels[file.path]! > 0), `${key}: no positive example`);
+      assert.ok(applicable.some(file => labels[file.path] === 0), `${key}: no negative example`);
     });
   }
 });
@@ -124,24 +122,30 @@ describe('Complete scans and issue results', () => {
         assert.equal(report.logType, fixture.type);
         assert.deepEqual(report.matchedLogTypes, [fixture.type]);
         assert.equal(report.bytesRead, file.size);
-        const applicable = game.detections.filter(rule => rule.logTypes.includes(fixture.type));
-        assert.equal(report.rulesRun, applicable.length);
-        const expected = applicable.filter(rule => {
-          const key = `${game.id}/${rule.code}`;
-          const label = expectedIssues[key]?.[fixture.path];
-          assert.equal(typeof label, 'boolean', `Review ${key} in ${fixture.path}`);
-          return label;
-        }).map(rule => rule.code).sort();
-        assert.deepEqual(report.findings.map(finding => finding.detectionCode).sort(), expected);
+        assert.equal(report.rulesRun, game.detections.length);
+        const expected = game.detections
+          .map(rule => [rule.code, expectedIssues[`${game.id}/${rule.code}`]![fixture.path]] as const)
+          .filter(([, count]) => count! > 0);
+        assert.deepEqual(
+          Object.fromEntries(report.findings.map(finding => [finding.detectionCode, finding.occurrences])),
+          Object.fromEntries(expected),
+        );
       });
     }
   }
 });
 
-test('MonoMod overflow counts the NullReference trace, not the unrelated inner-exception address', async () => {
-  const game = games.find(game => game.id === 'WotR')!;
-  const report = await scanLog(await openAsBlob(join(root, 'WotR/GameLogFull(162).txt')), 'GameLogFull.txt', game);
-  const finding = report.findings.find(finding => finding.detectionCode === 'WOTR-E001');
-  assert.equal(finding?.occurrences, 1);
-  assert.match(finding.evidence[0]!.text, /BlueprintsCache\.Init/);
+// These reported cases and false-positive checks are absent from the private logs.
+test('Harmony types and methods beyond the corpus examples', () => {
+  const handler = 'System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation. ---> System.TypeLoadException: Could not resolve type with token 01000029 (from typeref, class/assembly System.Runtime.CompilerServices.DefaultInterpolatedStringHandler, 0Harmony, Version=2.3.6.0, Culture=neutral, PublicKeyToken=null)';
+  for (const [text, expected] of [
+    [handler, true],
+    ['MissingMethodException: Method not found: void HarmonyLib.Harmony.PatchCategory(string)', true],
+    [handler.replace(', 0Harmony,', ', mscorlib,'), false],
+    ['MissingMethodException: void SomeMod.Patch(HarmonyLib.Harmony)', false],
+    ['MissingMethodException: HarmonyLib.CodeInstruction SomeMod.Build()', false],
+    ['  at HarmonyLib.Harmony.PatchCategory(System.String category)', false],
+  ] as const) {
+    assert.equal(oldHarmonyVersion().onLine({ text, number: 1, truncated: false }), expected, text);
+  }
 });

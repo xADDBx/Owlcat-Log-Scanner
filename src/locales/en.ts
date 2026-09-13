@@ -32,5 +32,20 @@ export const en = {
       name: 'Linux only: try another Proton version in Steam.',
       description: 'May help.',
     },
+    oldHarmony: {
+      name: 'Old Harmony version',
+      description: 'A mod needs a type or method missing from the loaded Harmony version.',
+    },
+    replaceHarmony: {
+      name: 'Replace Wrath_Data\\Managed\\0Harmony.dll with the copy in Wrath_Data\\Managed\\UnityModManager\\.',
+      description: 'On macOS, use Wrath.app/Contents/Resources/Data/Managed/ instead.',
+    },
+    downgradeUmm: {
+      name: 'Downgrade UnityModManager.',
+      urlLabel: 'Older UMM versions (Nexus Mods)',
+    },
+    doorstop: {
+      name: 'In UnityModManager, uninstall Assembly and reinstall with Doorstop (if available).',
+    },
   },
 };

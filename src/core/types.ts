@@ -27,7 +27,6 @@ interface DetectionInfo {
   description: string;
   severity: 'info' | 'warning' | 'error';
   solutionCodes: readonly string[];
-  logTypes: readonly string[];
 }
 
 export interface LineParser {
