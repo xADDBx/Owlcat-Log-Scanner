@@ -1,25 +1,8 @@
-import type { Detection, GameDefinition, LineParser, LogLine, Solution } from '../core/types';
+import type { Detection, GameDefinition, Solution } from '../core/types';
 import { en } from '../locales/en';
 import { relativeJumpOverflow } from './wotr/relative-jump';
 import { oldHarmonyVersion } from './wotr/old-harmony';
-
-function saveParsingError(error: RegExp): LineParser {
-  let exception: LogLine | undefined;
-  return {
-    onLine(line) {
-      const { text } = line;
-      if (error.test(text)) exception = line;
-      // Follow only this exception's stack; unrelated JSON errors aren't save errors.
-      else if (!/^\s*(?:at\s+|\(wrapper\s|[\w.`+<>\[\]]+\s*\(|Rethrow as )/.test(text)) exception = undefined;
-      if (exception && /\bKingmaker\.EntitySystem\.Persistence\.(?:ThreadedGameLoader|SaveManager)[.+]/.test(text)) {
-        const match = exception;
-        exception = undefined;
-        return match;
-      }
-      return false;
-    },
-  };
-}
+import { saveParsingError } from './wotr/save-parsing';
 
 export const detections: readonly Detection[] = [{
   code: 'WOTR-E001',
