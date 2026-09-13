@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <title>WotR Log Scanner · Owlcat Log Scanner</title>
+    <link rel="icon" href="data:,">
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body data-game="WotR">
+    <div class="shell">
+      <header class="site-header">
+        <a class="brand" href="../">Log Scanner</a>
+      </header>
+      <main>
+        <div class="page-heading">
+          <h1>Pathfinder: Wrath of the Righteous</h1>
+        </div>
+        <p id="catalog-notice" class="notice">No diagnostic checks are installed yet. This version reads and identifies logs.</p>
+        <div class="workspace">
+          <section class="scan-panel" aria-labelledby="choose-heading">
+            <div id="drop-zone" class="drop-zone">
+              <h2 id="choose-heading">Drop a log here</h2>
+              <p>Player.log or GameLogFull</p>
+              <button id="choose-file" class="primary" type="button">Choose a file</button>
+              <input id="file-input" type="file" hidden aria-label="Choose a log file">
+            </div>
+            <div id="scan-progress" class="progress-panel" hidden>
+              <div class="progress-heading"><strong id="active-file"></strong><button id="cancel" type="button">Cancel scan</button></div>
+              <label for="progress-bar" id="progress-label">Reading log…</label>
+              <progress id="progress-bar" max="100" value="0"></progress>
+              <p id="progress-detail" class="muted"></p>
+            </div>
+            <p id="status" role="status" aria-live="polite"></p>
+            <p id="error" class="error" role="alert" hidden></p>
+            <details class="log-help">
+              <summary>Where’s my log?</summary>
+              <label for="log-platform">System</label>
+              <select id="log-platform"></select>
+              <p id="log-path-hint"></p>
+              <code id="log-path" class="path"></code>
+              <button id="copy-path" class="secondary" type="button">Copy folder path</button>
+              <p id="copy-status" class="muted" role="status"></p>
+              <p>Use Player.log from the session with the issue.</p>
+            </details>
+          </section>
+          <div class="report-panel">
+            <aside class="support-panel" aria-labelledby="support-heading">
+              <div>
+                <h2 id="support-heading">Still stuck? Ask on Discord</h2>
+                <p>Attach your log and describe the issue.</p>
+              </div>
+              <a id="support-link" class="primary" target="_blank" rel="noopener noreferrer"></a>
+            </aside>
+            <section id="results" class="results" aria-labelledby="results-heading" hidden>
+              <h2 id="results-heading" tabindex="-1">Scan results</h2>
+              <div id="report-summary"></div>
+              <div id="findings"></div>
+            </section>
+          </div>
+        </div>
+        <noscript><p class="error">JavaScript is required to read logs locally. Enable it and reload this page.</p></noscript>
+      </main>
+    </div>
+  </body>
+</html>
