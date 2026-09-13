@@ -22,18 +22,21 @@ export interface Solution {
 
 interface DetectionInfo {
   code: string;
-  name: string;
+  name: string | ((finding: Finding) => string);
   aliases?: readonly string[];
   description: string;
   severity: 'info' | 'warning' | 'error';
   solutionCodes: readonly string[];
+  // Fallbacks run and appear after specific rules, regardless of registration order.
+  fallback?: boolean;
 }
 
 export interface LineParser {
   // Return true or the relevant earlier line once per occurrence. Keep state bounded.
-  onLine(line: LogLine): boolean | LogLine;
+  // earlierMatch means a specific rule processed before this one matched the current line.
+  onLine(line: LogLine, earlierMatch?: boolean): boolean | LogLine;
   // Optional end-of-file detection (e.g. a missing expected closing event).
-  finish?(): boolean;
+  finish?(): boolean | LogLine;
 }
 
 export type Detection = DetectionInfo & (

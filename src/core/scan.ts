@@ -62,7 +62,7 @@ export async function scanLog(
       };
     }
     return { rule, parser, failed: false };
-  });
+  }).sort((a, b) => Number(a.rule.fallback ?? false) - Number(b.rule.fallback ?? false));
   const findings = new Map<string, Finding>();
   const matchedTypes = new Set<string>();
   let linesRead = 0;
@@ -94,11 +94,15 @@ export async function scanLog(
       if (matchedTypes.has(type.id)) continue;
       if (matchesLogType(line, type)) matchedTypes.add(type.id);
     }
+    let earlierMatch = false;
     for (const runner of runners) {
       if (runner.failed) continue;
       try {
-        const match = runner.parser.onLine(line);
-        if (match) record(runner.rule.code, match === true ? line : match);
+        const match = runner.parser.onLine(line, earlierMatch);
+        if (match) {
+          record(runner.rule.code, match === true ? line : match);
+          if (!runner.rule.fallback) earlierMatch = true;
+        }
       } catch {
         runner.failed = true;
       }
@@ -139,7 +143,8 @@ export async function scanLog(
   for (const { rule, parser, failed } of applicable) {
     if (failed) throw new Error(`Check ${rule.code} failed. The scan is incomplete; ask for help on Discord.`);
     try {
-      if (parser.finish?.()) record(rule.code);
+      const match = parser.finish?.();
+      if (match) record(rule.code, match === true ? undefined : match);
     } catch {
       throw new Error(`Check ${rule.code} failed at the end of the log. The scan is incomplete.`);
     }

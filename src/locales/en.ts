@@ -84,5 +84,9 @@ export const en = {
     updateMakingFriends: {
       name: 'Install the MAKING FRIENDS build from Discord',
     },
+    blueprintsCacheInit: {
+      name: (mods: string) => `${mods}: error during blueprint initialization`,
+      description: 'A mod threw an exception in a BlueprintsCache.Init patch.',
+    },
   },
 };

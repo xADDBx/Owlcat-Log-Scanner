@@ -5,6 +5,7 @@ import { oldHarmonyVersion } from './wotr/old-harmony';
 import { saveParsingError } from './wotr/save-parsing';
 import { modConflict, modConflicts } from './wotr/mod-conflicts';
 import { makingFriendsGuidError } from './wotr/making-friends';
+import { blueprintInitMod, blueprintsCacheInit } from './wotr/blueprints-cache';
 
 export const detections: readonly Detection[] = [{
   code: 'WOTR-E001',
@@ -62,6 +63,18 @@ export const detections: readonly Detection[] = [{
   solutionCodes: ['WOTR-S010'],
   kind: 'parser',
   create: makingFriendsGuidError,
+}, {
+  code: 'WOTR-E008',
+  fallback: true,
+  aliases: ['ModBlueprintsCacheInit'],
+  ...en.wotr.blueprintsCacheInit,
+  name: ({ evidence }) => en.wotr.blueprintsCacheInit.name(
+    [...new Set(evidence.map(line => blueprintInitMod(line.text)))].join(', '),
+  ),
+  severity: 'error',
+  solutionCodes: [],
+  kind: 'parser',
+  create: blueprintsCacheInit,
 }];
 
 export const solutions: readonly Solution[] = [

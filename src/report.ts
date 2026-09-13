@@ -59,7 +59,7 @@ export function renderReport(
     const rule = game.detections.find((candidate) => candidate.code === finding.detectionCode);
     if (!rule) continue;
     const card = element('article', '', `finding ${rule.severity}`);
-    card.append(element('h3', rule.name));
+    card.append(element('h3', typeof rule.name === 'function' ? rule.name(finding) : rule.name));
     const first = finding.evidence[0];
     if (first) card.append(element('pre', first.text));
     if (rule.solutionCodes.length) card.append(element('p', en.possibleFixes));

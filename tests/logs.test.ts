@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createReadStream, openAsBlob } from 'node:fs';
-import { readdir } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { describe, test } from 'node:test';
@@ -153,5 +153,53 @@ test('Harmony types and methods beyond the corpus examples', () => {
     ['  at HarmonyLib.Harmony.PatchCategory(System.String category)', false],
   ] as const) {
     assert.equal(oldHarmonyVersion().onLine({ text, number: 1, truncated: false }), expected, text);
+  }
+});
+
+test('Blueprint-init fallback is suppressed per exception, in either log format', async () => {
+  const wotr = games.find(game => game.id === 'WotR')!;
+  const rule = wotr.detections.find(rule => rule.code === 'WOTR-E008')!;
+  const game = { ...wotr, detections: [rule, ...wotr.detections.filter(candidate => candidate !== rule)] };
+  async function stack(file: string, error: string): Promise<string> {
+    const lines = (await readFile(join(root, 'WotR', file), 'utf8')).split(/\r\n|\r|\n/);
+    const start = lines.findIndex(line => line.startsWith(error));
+    assert.ok(start >= 0);
+    const end = lines.findIndex((line, i) => i > start && !line.trim());
+    return lines.slice(start, end < 0 ? undefined : end).join('\n');
+  }
+  const unknown = await stack('Player(5)(1).log', 'ArgumentException:');
+  const known = await stack('Player(206).log', 'FormatException:');
+  const lateMatch = unknown.replace('ArgumentException:', 'NullReferenceException:') + '\n  at Native.Call () <0x123456 + 0x00000>';
+  const playerHeader = fixtures.find(file => file.path === 'WotR/Player(5)(1).log')!.firstLine;
+  for (const header of [playerHeader, '[0 - Resources]: Requested: dungeons_areshkagal_prologue.worldtex, loading']) {
+    for (const [body, codes] of [
+      [unknown, ['WOTR-E008']],
+      [known, ['WOTR-E007']],
+      [`${known}\n\n${unknown}`, ['WOTR-E007', 'WOTR-E008']],
+      [`${unknown}\n\n${known}`, ['WOTR-E007', 'WOTR-E008']],
+      [unknown.slice(unknown.indexOf('\n') + 1), []],
+      [unknown.replaceAll('ExpandedContent.', 'System.'), []],
+      [unknown.replace('BlueprintsCache.Init_Patch8', 'BlueprintsCache.Load_Patch8'), []],
+      [unknown.replace('  at ExpandedContent.Tweaks.ContentAdder', '\n  at ExpandedContent.Tweaks.ContentAdder'), []],
+      [lateMatch, ['WOTR-E001']],
+    ] as const) {
+      const text = header === playerHeader ? body : body.replace(/^[ \t]*at /gm, '');
+      // No final newline: pending fallback evidence must also survive EOF.
+      const report = await scanLog(new Blob([`${header}\n${text}`]), 'sample.log', game);
+      assert.ok(report.logType);
+      assert.deepEqual(report.findings.map(finding => finding.detectionCode), codes);
+      assert.ok(report.findings.every(finding => finding.occurrences === 1));
+      const fallback = report.findings.find(finding => finding.detectionCode === rule.code);
+      if (fallback) {
+        assert.equal(typeof rule.name, 'function');
+        assert.equal(typeof rule.name === 'function' && rule.name(fallback), 'ExpandedContent: error during blueprint initialization');
+      }
+    }
+    // A future rule appended after the fallback must still take precedence.
+    const futureRule = { ...game.detections.find(candidate => candidate.code === 'WOTR-E007')!, code: 'WOTR-E999' };
+    const body = `${known}\n\n${unknown}`;
+    const text = header === playerHeader ? body : body.replace(/^[ \t]*at /gm, '');
+    const report = await scanLog(new Blob([`${header}\n${text}`]), 'sample.log', { ...game, detections: [rule, futureRule] });
+    assert.deepEqual(report.findings.map(finding => [finding.detectionCode, finding.occurrences]), [['WOTR-E999', 1], ['WOTR-E008', 1]]);
   }
 });
