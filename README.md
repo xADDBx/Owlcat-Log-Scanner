@@ -2,6 +2,11 @@
 
 Static TypeScript/Vite app for WotR logs. Processing runs in a browser worker.
 
+## Disclaimer
+
+Most of this is AI Generated as a proof of concept.
+The detections and solutions themselves are based on issues that I personally saw various users encounter over the years.
+
 ## Run
 
 Use Node.js 24 and npm.
