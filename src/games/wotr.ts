@@ -2,6 +2,7 @@ import type { Detection, GameDefinition, Solution } from '../core/types';
 import { en } from '../locales/en';
 import { relativeJumpOverflow } from './wotr/relative-jump';
 import { oldHarmonyVersion } from './wotr/old-harmony';
+import { saveParsingError } from './wotr/save-parsing';
 
 export const detections: readonly Detection[] = [{
   code: 'WOTR-E001',
@@ -19,6 +20,22 @@ export const detections: readonly Detection[] = [{
   solutionCodes: ['WOTR-S004', 'WOTR-S005', 'WOTR-S006'],
   kind: 'parser',
   create: oldHarmonyVersion,
+}, {
+  code: 'WOTR-E003',
+  aliases: ['SaveParsingError.MalformedSaveData'],
+  ...en.wotr.malformedSave,
+  severity: 'error',
+  solutionCodes: [],
+  kind: 'parser',
+  create: () => saveParsingError(/\bJsonReaderException:/),
+}, {
+  code: 'WOTR-E004',
+  aliases: ['SaveParsingError.MissingBlueprintGuid'],
+  ...en.wotr.missingSaveBlueprint,
+  severity: 'error',
+  solutionCodes: ['WOTR-S007'],
+  kind: 'parser',
+  create: () => saveParsingError(/\bJsonSerializationException: Failed to load blueprint by guid [\da-f]{32}\b/i),
 }];
 
 export const solutions: readonly Solution[] = [
@@ -40,6 +57,11 @@ export const solutions: readonly Solution[] = [
     url: 'https://www.nexusmods.com/site/mods/21?tab=files',
   },
   { code: 'WOTR-S006', ...en.wotr.doorstop },
+  {
+    code: 'WOTR-S007',
+    ...en.wotr.restoreSaveMods,
+    url: 'https://alterasc.github.io/#raw-list-of-blueprints-for-troubleshooting',
+  },
 ];
 
 export const wotr: GameDefinition = {

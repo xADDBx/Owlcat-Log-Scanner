@@ -47,5 +47,18 @@ export const en = {
     doorstop: {
       name: 'In UnityModManager, uninstall Assembly and reinstall with Doorstop (if available).',
     },
+    malformedSave: {
+      name: 'Malformed save data',
+      description: 'The game could not parse JSON while loading a save.',
+    },
+    missingSaveBlueprint: {
+      name: 'Missing blueprint in save',
+      description: 'The save references a blueprint that could not be loaded.',
+    },
+    restoreSaveMods: {
+      name: 'Make sure all mods used by this save are still installed and enabled.',
+      urlLabel: 'Mod blueprint database',
+      description: 'Search all_blueprints.txt for the missing GUID from your log (Ctrl+F); a match may identify the mod.',
+    },
   },
 };
