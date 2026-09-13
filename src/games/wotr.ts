@@ -36,6 +36,14 @@ export const detections: readonly Detection[] = [{
   solutionCodes: ['WOTR-S007'],
   kind: 'parser',
   create: () => saveParsingError(/\bJsonSerializationException: Failed to load blueprint by guid [\da-f]{32}\b/i),
+}, {
+  code: 'WOTR-E006',
+  aliases: ['CrashToDesktop'],
+  ...en.wotr.crashToDesktop,
+  severity: 'error',
+  solutionCodes: ['WOTR-S008'],
+  kind: 'regex',
+  pattern: /^=+ OUTPUTTING STACK TRACE =+$/,
 }];
 
 export const solutions: readonly Solution[] = [
@@ -62,6 +70,11 @@ export const solutions: readonly Solution[] = [
     ...en.wotr.restoreSaveMods,
     url: 'https://alterasc.github.io/#raw-list-of-blueprints-for-troubleshooting',
   },
+  {
+    code: 'WOTR-S008',
+    ...en.wotr.verifyGameFiles,
+    url: 'https://help.steampowered.com/en/faqs/view/0C48-FCBD-DA71-93EB',
+  },
 ];
 
 export const wotr: GameDefinition = {
@@ -79,6 +92,10 @@ export const wotr: GameDefinition = {
     {
       ...en.logPaths.mac,
       path: '~/Library/Logs/Owlcat Games/Pathfinder Wrath Of The Righteous/',
+    },
+    {
+      ...en.logPaths.macGameLogFull,
+      path: '~/Library/Application Support/Owlcat Games/Pathfinder Wrath Of The Righteous/',
     },
   ],
   logTypes: [

@@ -12,8 +12,12 @@ export const en = {
       hint: 'Default Steam location. Other libraries or Flatpak installs may use a different Steam folder.',
     },
     mac: {
-      label: 'macOS',
+      label: 'macOS (Player.log)',
       hint: 'In Finder, press Shift+Command+G and paste this path.',
+    },
+    macGameLogFull: {
+      label: 'macOS (GameLogFull.txt)',
+      hint: 'In Finder, press Shift+Command+G and paste this path. If missing, check the “Log Directory” line in Player.log.',
     },
   },
   wotr: {
@@ -59,6 +63,14 @@ export const en = {
       name: 'Make sure all mods used by this save are still installed and enabled.',
       urlLabel: 'Mod blueprint database',
       description: 'Search all_blueprints.txt for the GUID above (Ctrl+F); a match may identify the mod.',
+    },
+    crashToDesktop: {
+      name: 'Crash to desktop',
+      description: 'The log contains a native crash report. The cause is not identified.',
+    },
+    verifyGameFiles: {
+      name: 'Verify game files in your launcher.',
+      urlLabel: 'Steam: verify game files',
     },
   },
 };
